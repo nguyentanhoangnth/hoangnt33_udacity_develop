@@ -27,13 +27,21 @@ const util_1 = require("./util/util");
         if (!image_url || image_url == "") {
             return res.status(400).send({ message: "Image Url is required or malformed" });
         }
-        const resultUrl = yield util_1.filterImageFromURL(image_url);
-        if (!resultUrl || resultUrl == "") {
+        try {
+            let absolutePath = yield util_1.filterImageFromURL(req.query.image_url);
+            res.sendFile(absolutePath, (err) => __awaiter(this, void 0, void 0, function* () {
+                if (err) {
+                    return res.status(201).send({ message: "Have no any resources can be find" });
+                }
+                else {
+                    yield util_1.deleteLocalFiles([absolutePath]);
+                    return res.status(200);
+                }
+            }));
+        }
+        catch (e) {
             return res.status(201).send({ message: "Have no any resources can be find" });
         }
-        // delete local file
-        res.on('finish', () => util_1.deleteLocalFiles([resultUrl]));
-        return res.status(200).send({ message: "Get image successfully", url: resultUrl });
     }));
     // Root Endpoint
     // Displays a simple message to the user
